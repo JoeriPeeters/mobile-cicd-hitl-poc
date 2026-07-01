@@ -4,16 +4,26 @@ const path = require("path");
 
 const OUT = "screenshots";
 
-// Instrumented mobile simulation: load the app, assert it rendered, and capture
-// a screenshot per device viewport as visual evidence for the PR.
-test("home screen renders", async ({ page }, testInfo) => {
+// Instrumented mobile simulation: load the app, assert the themed home screen
+// rendered, exercise the bottom tab bar, and capture a screenshot per device
+// viewport as visual evidence for the PR.
+test("home screen renders and tabs switch", async ({ page }, testInfo) => {
   await page.goto("/");
   // react-native-web renders <Text> as spans/divs, not HTML headings, so match by text.
-  await expect(page.getByText("HITL CI/CD POC")).toBeVisible();
-  await expect(page.getByText("Release gates")).toBeVisible();
-  await expect(page.getByText("Get started")).toBeVisible();
+  await expect(page.getByText("Thunderloop Park").first()).toBeVisible();
+  await expect(page.getByText("Featured Coasters")).toBeVisible();
+  await expect(page.getByText("The Screaming Comet")).toBeVisible();
+  await expect(page.getByText("Buy Day Passes")).toBeVisible();
 
   fs.mkdirSync(OUT, { recursive: true });
-  const file = path.join(OUT, `home-${testInfo.project.name}.png`);
-  await page.screenshot({ path: file, fullPage: true });
+  await page.screenshot({ path: path.join(OUT, `home-${testInfo.project.name}.png`), fullPage: true });
+
+  // Bottom tab bar: switching to Attractions swaps the visible screen.
+  await page.getByText("Attractions").click();
+  await expect(page.getByText("Every ride, show, and snack stand")).toBeVisible();
+  await page.screenshot({ path: path.join(OUT, `attractions-${testInfo.project.name}.png`), fullPage: true });
+
+  // ...and switching to About Us shows the about placeholder.
+  await page.getByText("About Us").click();
+  await expect(page.getByText(/spinning smiles since 1974/)).toBeVisible();
 });
