@@ -18,6 +18,13 @@ const TABS = [
   { key: "about", label: "About Us", icon: "ℹ️" },
 ];
 
+// Opening hours shown on the About Us screen.
+const PARK_HOURS = [
+  { days: "Mon – Thu", hours: "10:00 – 20:00" },
+  { days: "Fri – Sat", hours: "10:00 – 23:00" },
+  { days: "Sunday", hours: "10:00 – 21:00" },
+];
+
 function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.screenBody}>
@@ -59,14 +66,57 @@ function AttractionsScreen() {
 
 function AboutScreen() {
   return (
-    <View style={styles.placeholder}>
-      <Text style={styles.placeholderEmoji}>ℹ️</Text>
-      <Text style={styles.placeholderTitle}>About Us</Text>
-      <Text style={styles.placeholderBody}>
-        {PARK_NAME} has been spinning smiles since 1974. Hours, tickets, and
-        directions land here next.
-      </Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.screenBody}>
+      <View style={styles.hero}>
+        <Text style={styles.heroEmoji}>ℹ️</Text>
+        <Text style={styles.heroTitle}>About Us</Text>
+        <Text style={styles.heroSub}>Spinning smiles since 1974</Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Our Story</Text>
+      <View style={styles.card}>
+        <Text style={styles.cardBody}>
+          {PARK_NAME} opened its gates in 1974 with a single wooden coaster and a
+          big dream: to be the friendliest thrill on Earth. Fifty years and more
+          than a dozen record-breaking rides later, three generations of families
+          have thrown their hands in the air with us. From the first click of the
+          lift hill to the last splash of the day, we live for that unforgettable
+          moment when the ground drops away and the whole park screams as one.
+        </Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Park Hours</Text>
+      <View style={styles.card}>
+        <View style={styles.cardText}>
+          {PARK_HOURS.map((row) => (
+            <View key={row.days} style={styles.hoursRow}>
+              <Text style={styles.hoursDays}>{row.days}</Text>
+              <Text style={styles.hoursTime}>{row.hours}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Find Us</Text>
+      <View style={styles.card}>
+        <Text style={styles.cardEmoji}>📍</Text>
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>Thunderloop Park</Text>
+          <Text style={styles.cardBody}>
+            1 Coaster Way, Thrillsville, CA 90210
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Get in Touch</Text>
+      <View style={styles.card}>
+        <Text style={styles.cardEmoji}>✉️</Text>
+        <View style={styles.cardText}>
+          <Text style={styles.cardBody}>hello@thunderloop.park</Text>
+          <Text style={styles.cardBody}>+1 (555) 843-7767</Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -144,7 +194,11 @@ const styles = StyleSheet.create({
   cardEmoji: { fontSize: 34 },
   cardText: { flex: 1 },
   cardTitle: { color: "#fff", fontSize: 16, fontWeight: "700", marginBottom: 4 },
-  cardBody: { color: "#d6c7f0", fontSize: 13 },
+  cardBody: { color: "#d6c7f0", fontSize: 13, lineHeight: 20 },
+
+  hoursRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
+  hoursDays: { color: "#fff", fontSize: 14, fontWeight: "600" },
+  hoursTime: { color: "#ffd93d", fontSize: 14, fontWeight: "700" },
 
   button: {
     backgroundColor: "#ffd93d",

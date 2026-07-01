@@ -23,7 +23,12 @@ test("home screen renders and tabs switch", async ({ page }, testInfo) => {
   await expect(page.getByText("Every ride, show, and snack stand")).toBeVisible();
   await page.screenshot({ path: path.join(OUT, `attractions-${testInfo.project.name}.png`), fullPage: true });
 
-  // ...and switching to About Us shows the about placeholder.
+  // ...and switching to About Us shows the real park info (story, hours, contact).
   await page.getByText("About Us").click();
-  await expect(page.getByText(/spinning smiles since 1974/)).toBeVisible();
+  await expect(page.getByText(/Spinning smiles since 1974/)).toBeVisible();
+  await expect(page.getByText("Our Story")).toBeVisible();
+  await expect(page.getByText("Park Hours")).toBeVisible();
+  await expect(page.getByText("1 Coaster Way, Thrillsville, CA 90210")).toBeVisible();
+  await expect(page.getByText("hello@thunderloop.park")).toBeVisible();
+  await page.screenshot({ path: path.join(OUT, `about-${testInfo.project.name}.png`), fullPage: true });
 });
