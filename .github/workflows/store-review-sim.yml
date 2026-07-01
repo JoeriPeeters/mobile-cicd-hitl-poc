@@ -16,6 +16,7 @@ on:
         description: "Simulated store decision"
         type: choice
         options: [approved, rejected]
+        default: approved
         required: true
       reason:
         description: "Rejection reason (only if rejected)"
@@ -27,17 +28,21 @@ jobs:
     permissions:
       contents: read
       issues: write
+    env:
+      SUBMISSION_ID: ${{ inputs.submission_id }}
+      VERDICT: ${{ inputs.verdict }}
+      REASON: ${{ inputs.reason }}
     steps:
       - name: Handle verdict
         run: |
-          if [ "${{ inputs.verdict }}" = "approved" ]; then
-            echo "✅ [SIMULATED] Store APPROVED ${{ inputs.submission_id }}"
+          if [ "$VERDICT" = "approved" ]; then
+            echo "✅ [SIMULATED] Store APPROVED $SUBMISSION_ID"
             echo "→ Release (mock). Real next step: begin a phased / staged rollout,"
             echo "  then monitor crash-free rate and advance or halt — the rollout"
             echo "  percentage is your blast-radius dial."
           else
-            echo "❌ [SIMULATED] Store REJECTED ${{ inputs.submission_id }}"
-            echo "Reason: ${{ inputs.reason || 'unspecified' }}"
+            echo "❌ [SIMULATED] Store REJECTED $SUBMISSION_ID"
+            echo "Reason: ${REASON:-unspecified}"
             echo "→ Routing to the human rejection loop (opening an issue)."
           fi
 
@@ -48,12 +53,13 @@ jobs:
         run: |
           gh label create store-rejection --color b60205 --force \
             --description "A simulated store review rejected a submission" \
-            --repo "${{ github.repository }}" >/dev/null 2>&1 || true
-          gh issue create --repo "${{ github.repository }}" \
-            --title "Store rejection: ${{ inputs.submission_id }}" \
+            --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || true
+          {
+            printf 'The simulated store review **rejected** submission `%s`.\n\n' "$SUBMISSION_ID"
+            printf '**Reason:** %s\n\n' "${REASON:-unspecified}"
+            printf 'Human loop: fix the issue, cut a new **Release**, and resubmit.\n'
+          } > rejection-body.md
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Store rejection: $SUBMISSION_ID" \
             --label store-rejection \
-            --body "The simulated store review **rejected** submission \`${{ inputs.submission_id }}\`.
-
-**Reason:** ${{ inputs.reason || 'unspecified' }}
-
-Human loop: fix the issue, cut a new **Release**, and resubmit."
+            --body-file rejection-body.md
