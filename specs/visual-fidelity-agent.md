@@ -1,6 +1,6 @@
 ---
 # status: draft | agreed | implemented
-status: draft
+status: implemented
 # Not a UI feature — no Figma frame of its own. This agent *reads* the figma:
 # link from other specs to know what to compare against.
 figma:
@@ -8,8 +8,8 @@ figma:
 
 # Visual fidelity review agent
 
-> Status: draft
-> Related issue: #<n> (once filed)
+> Status: implemented
+> Related issue: #9
 
 ## Problem
 
@@ -106,20 +106,21 @@ Advisory only — the human reviewer decides at GATE 1.
 
 ## Acceptance criteria
 
-- [ ] A workflow runs on PRs and, when the PR implements a UI spec, posts a
-      **"🎨 Design fidelity review"** comment.
-- [ ] The Figma frame is fetched from the spec's `figma:` link via the Figma REST
+- [x] A workflow (`visual-fidelity.yml`) runs after the visual test and, when the
+      PR implements a UI spec, posts a **"🎨 Design fidelity review"** comment.
+- [x] The Figma frame is fetched from the spec's `figma:` link via the Figma REST
       API using a `FIGMA_TOKEN` secret (documented in `README.md` setup).
-- [ ] Comparison is done by a vision model against the spec's acceptance criteria;
+- [x] Comparison is done by a vision model against the spec's acceptance criteria;
       the comment lists discrepancies by category (or states it looks faithful).
-- [ ] The agent is **advisory**: no required check, never fails the PR, and makes no
-      commits or file edits.
-- [ ] Re-runs **update** the existing comment rather than posting duplicates.
-- [ ] A PR with **no** spec/`figma:` link is skipped gracefully (fail-open), not
+- [x] The agent is **advisory**: it runs on `workflow_run` (not a required check),
+      never fails the PR, and makes no commits or file edits.
+- [x] Re-runs **update** the existing comment (matched by a hidden marker) rather
+      than posting duplicates.
+- [x] A PR with **no** spec/`figma:` link is skipped gracefully (fail-open), not
       errored.
-- [ ] Workflow permissions are least-privilege (`contents: read`,
-      `pull-requests: write`); secrets never appear in logs or comments.
-- [ ] `docs/pipeline.md` step 3b and `docs/design-workflow.md` are updated to point
+- [x] Workflow permissions are least-privilege (`contents: read`,
+      `pull-requests: write`); secrets are env-only and never appear in logs or comments.
+- [x] `docs/pipeline.md` step 3b and `docs/design-workflow.md` are updated to point
       at this agent as the automated visual-verify step.
 
 ## Open questions

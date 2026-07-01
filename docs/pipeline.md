@@ -33,7 +33,8 @@ and automation do the work in between.
         └─ Visual test: Playwright renders the  │   screenshots posted INLINE on the PR
            real Expo app at mobile viewports    │
  🤖 3b. (optional) advisory agents              │   findings posted on the PR, not blocking
-        ├─ Visual agent reviews screenshots     │
+        ├─ Design fidelity agent: compares the  │   visual-fidelity.yml — a vision model
+        │  screenshot to the spec's Figma frame │   diffs the screenshot vs the Figma frame
         └─ Risk routing → OWASP security agent  │   (high-risk changes only)
                                                 │
  ══════════════════════════════════════════════╪══════════════════════════════
@@ -91,7 +92,7 @@ and automation do the work in between.
 | --- | --- | --- |
 | 🧑 **Human** | writes issues, reviews code + screenshots, approves merges & releases, handles rejections | you |
 | 🤖 **Coding agent** | implements issues, opens bot-authored PRs, iterates on `@claude` | Claude GitHub Action |
-| 🤖 **Advisory agents** | review the diff / screenshots (visual, security) — advisory, not blocking | visual agent, OWASP agent (reference repo) |
+| 🤖 **Advisory agents** | review the diff / screenshots (visual, security) — advisory, not blocking | design fidelity agent (`visual-fidelity.yml`); OWASP agent (reference repo) |
 | ⚙️ **Automation** | CI, visual render, release orchestration, routing | GitHub Actions |
 | 🍏 **External** | app review verdict | Apple / Google (simulated here) |
 
