@@ -1,0 +1,52 @@
+# Visual test — "instrumented mobile simulation".
+#
+# On every PR: render the app in a browser at mobile viewports (Playwright),
+# capture screenshots, upload them as artifacts, and post them INLINE into the
+# PR so a human can review the actual rendered UI before approving.
+#
+# Today the render is a static web seam; swap it for `expo export --platform web`
+# once the Nx+Expo app exists — the Playwright specs stay identical.
+name: Visual test
+
+on:
+  pull_request:
+
+permissions:
+  contents: write # push screenshots to the visual-snapshots branch
+  pull-requests: write # post the screenshot comment
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture screenshots
+        run: npm run test:visual
+
+      - name: Upload screenshots (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
+
+      - name: Publish screenshots to the PR (inline)
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/publish-screenshots.sh
