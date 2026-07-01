@@ -29,7 +29,7 @@ jobs:
           base_branch: main
           claude_args: |
             --model claude-opus-4-8
-            --max-turns 25
+            --max-turns 50
             --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,Bash"
           prompt: |
             Implement GitHub issue #${{ github.event.issue.number }} in this repository.
@@ -50,4 +50,8 @@ jobs:
             - Open a pull request targeting `main` that links back to this issue
               (e.g. "Closes #${{ github.event.issue.number }}"), describing what
               changed, how you verified it, and any assumptions.
-            - Do not modify files under .github/ or the release gates.
+            - Do not modify `.github/workflows/` or the release gates *unless the
+              issue or its referenced spec explicitly asks* (e.g. a spec that
+              authorizes adding a workflow). When authorized, add only what the
+              spec calls for. Never turn the mocked build/submit into real store
+              submissions.
