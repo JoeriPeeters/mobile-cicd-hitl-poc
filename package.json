@@ -4,9 +4,14 @@
   "private": true,
   "description": "React Native app skeleton for a HITL CI/CD feasibility POC.",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:visual": "playwright test"
+  },
+  "jest": {
+    "testMatch": ["**/src/**/*.test.js"]
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "jest": "^29.7.0"
   }
 }
