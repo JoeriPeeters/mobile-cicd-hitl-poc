@@ -75,6 +75,10 @@ CI and the visual screenshot run.
   the code-merge gate.
 - The **`production` environment** must have a **required reviewer** for the
   release-approval gate to actually pause. (Settings → Environments → production.)
+- **`FIGMA_TOKEN`** (Settings → Secrets → Actions) — a Figma personal access
+  token with **read** scope, used by the advisory
+  [visual fidelity agent](docs/visual-fidelity-agent.md) to render the linked
+  design frame for comparison. Optional: without it the agent skips gracefully.
 
 ## Next increments
 
@@ -82,6 +86,7 @@ CI and the visual screenshot run.
 - Add **risk-based routing** and agent-assisted review (ported from the
   `agentic-hitl-poc` reference).
 - Extend the **design flow** (already seeded — see
-  [`docs/design-workflow.md`](docs/design-workflow.md)): add Figma **Code Connect**
-  mappings and an automated visual-verify step that diffs the PR screenshot against
-  the linked Figma frame.
+  [`docs/design-workflow.md`](docs/design-workflow.md)): the advisory
+  [visual fidelity agent](docs/visual-fidelity-agent.md) already compares the PR
+  screenshot against the linked Figma frame; next, add Figma **Code Connect**
+  mappings and per-section (not just whole-screen) comparison.

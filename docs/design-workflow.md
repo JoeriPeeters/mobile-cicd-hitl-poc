@@ -53,7 +53,11 @@ agent.
 ```
 
 The key move: **the Figma frame is the visual rubric and the visual-test
-screenshot is the evidence.** The reviewer at GATE 1 puts them side by side.
+screenshot is the evidence.** The reviewer at GATE 1 puts them side by side —
+and the **advisory [visual fidelity agent](visual-fidelity-agent.md)** does that
+comparison first, posting a categorised findings comment so the human scans a
+focused list instead of eyeballing two images. It never blocks; the human still
+decides.
 
 ## The Figma file
 

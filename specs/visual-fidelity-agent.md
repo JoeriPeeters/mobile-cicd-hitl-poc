@@ -9,7 +9,8 @@ figma:
 # Visual fidelity review agent
 
 > Status: draft
-> Related issue: #<n> (once filed)
+> Related issue: #9
+> Implementation notes: [`docs/visual-fidelity-agent.md`](../docs/visual-fidelity-agent.md)
 
 ## Problem
 
