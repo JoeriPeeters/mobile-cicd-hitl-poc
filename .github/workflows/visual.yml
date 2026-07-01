@@ -30,8 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        # iPhone device profile uses WebKit; Pixel uses Chromium.
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Capture screenshots
         run: npm run test:visual
