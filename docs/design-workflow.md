@@ -38,12 +38,16 @@ agent.
                      │
                      ▼
 ⚙️ 5. Automated checks                   CI (typecheck + tests) +
-      └─ Visual test screenshots the       Playwright renders the Expo web export
-         real app on the PR
-                     │
+      ├─ Visual test screenshots the       Playwright renders the Expo web export
+      │  real app on the PR
+      └─ 🤖 Design fidelity agent          visual-fidelity.yml — a vision model
+         compares that screenshot to the      compares screenshot vs Figma frame and
+         spec's Figma frame (advisory)        posts a "🎨 Design fidelity review"
+                     │                         comment; advisory, never blocks
       ══════════════════════════════════════════════════════════
 🧑 6. GATE 1 — review the PR             ← the human decides
-      compare the visual-test screenshot     (branch protection: 1 review + CI)
+      read the design fidelity comment,      (branch protection: 1 review + CI)
+      compare the visual-test screenshot
       against the Figma frame; check the
       spec's acceptance criteria
       ══════════════════════════════════════════════════════════
@@ -53,7 +57,10 @@ agent.
 ```
 
 The key move: **the Figma frame is the visual rubric and the visual-test
-screenshot is the evidence.** The reviewer at GATE 1 puts them side by side.
+screenshot is the evidence.** The reviewer at GATE 1 puts them side by side —
+and the **design fidelity agent** ([`specs/visual-fidelity-agent.md`](../specs/visual-fidelity-agent.md),
+`.github/workflows/visual-fidelity.yml`) does that comparison first and posts a
+focused, advisory list of likely discrepancies. It never blocks; the human decides.
 
 ## The Figma file
 
@@ -96,8 +103,9 @@ To get a frame's link in Figma: right-click the frame → **Copy link to selecti
    frame link into `figma:`. Open a PR with just the spec and get it merged.
 3. **Hand off 🧑.** File an issue whose body is **"Implement `specs/<feature>.md`"**
    and add the `claude` label.
-4. **Review 🧑.** At GATE 1, check the PR's visual-test screenshot against the
-   Figma frame and the spec's acceptance criteria, then approve.
+4. **Review 🧑.** At GATE 1, read the design fidelity agent's advisory comment,
+   check the PR's visual-test screenshot against the Figma frame and the spec's
+   acceptance criteria, then approve.
 
 The existing screens are documented as worked examples — see
 [`specs/home-screen.md`](../specs/home-screen.md),

@@ -75,6 +75,13 @@ CI and the visual screenshot run.
   the code-merge gate.
 - The **`production` environment** must have a **required reviewer** for the
   release-approval gate to actually pause. (Settings → Environments → production.)
+- **Design fidelity review** (advisory, `visual-fidelity.yml`) needs two secrets
+  (Settings → Secrets and variables → Actions): `ANTHROPIC_API_KEY` (already used
+  by the `claude*` workflows) and **`FIGMA_TOKEN`** — a Figma personal access
+  token with **read** scope (figma.com → Settings → *Personal access tokens*). It
+  renders each UI spec's linked Figma frame and posts a comment comparing it to
+  the visual-test screenshot. It's advisory: no secrets ⇒ it just skips, and it
+  never blocks the PR. See [`specs/visual-fidelity-agent.md`](specs/visual-fidelity-agent.md).
 
 ## Next increments
 
@@ -82,6 +89,6 @@ CI and the visual screenshot run.
 - Add **risk-based routing** and agent-assisted review (ported from the
   `agentic-hitl-poc` reference).
 - Extend the **design flow** (already seeded — see
-  [`docs/design-workflow.md`](docs/design-workflow.md)): add Figma **Code Connect**
-  mappings and an automated visual-verify step that diffs the PR screenshot against
-  the linked Figma frame.
+  [`docs/design-workflow.md`](docs/design-workflow.md)): the automated
+  visual-verify step now exists (`visual-fidelity.yml`, advisory); next add Figma
+  **Code Connect** mappings and per-section (not whole-screen) frame comparison.
