@@ -10,10 +10,27 @@ real release.
 
 ## Layout
 
+- `mobile/App.js` — the real Expo app (the UI you build features into).
 - `src/` — a tiny testable JS module (real, so CI does real work).
-- `App.js` — a skeleton RN entry point (illustrative; not built here).
+- `visual/app.spec.js` — Playwright visual test against the Expo web export.
+- `specs/` — the durable "what & why" per feature; read the relevant spec first.
 - `.github/workflows/` — CI + the release pipeline (see below).
 - `docs/release-gates.md` — the HITL gates and the mock strategy.
+- `docs/design-workflow.md` — the Figma → spec → agent → PR loop.
+
+## Specs & design
+
+Features are **spec-driven**. When an issue says "Implement `specs/<feature>.md`":
+
+1. **Read that spec first** — it's the source of truth for behavior and acceptance
+   criteria, and it carries a `figma:` link to the exact design frame.
+2. Build the UI in `mobile/App.js` to match the linked Figma frame and the spec.
+   Reuse the existing look (the `Color`/`Radius`/`Spacing` values already in the
+   `StyleSheet`); introduce new patterns only if the spec calls for them.
+3. **No navigation library or native-heavy deps** — they break the
+   `expo export --platform web` step the visual test relies on. Use plain RN
+   primitives (View/Text/Pressable/StyleSheet) + local state.
+4. Update `visual/app.spec.js` if its text assertions no longer match the screen.
 
 ## Pipeline (what's real vs mocked)
 
