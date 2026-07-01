@@ -18,10 +18,18 @@ test("home screen renders and tabs switch", async ({ page }, testInfo) => {
   fs.mkdirSync(OUT, { recursive: true });
   await page.screenshot({ path: path.join(OUT, `home-${testInfo.project.name}.png`), fullPage: true });
 
-  // Bottom tab bar: switching to Attractions swaps the visible screen.
+  // Bottom tab bar: switching to Attractions shows the browsable rides list.
   await page.getByText("Attractions").click();
-  await expect(page.getByText("Every ride, show, and snack stand")).toBeVisible();
+  await expect(page.getByText("6 rides & attractions")).toBeVisible();
+  await expect(page.getByText("The Screaming Comet")).toBeVisible();
+  await expect(page.getByText("Grand Carousel")).toBeVisible();
+  await expect(page.getByText("Haunted Mine")).toBeVisible();
   await page.screenshot({ path: path.join(OUT, `attractions-${testInfo.project.name}.png`), fullPage: true });
+
+  // Filter chips narrow the list to one category via local state.
+  await page.getByRole("button", { name: "Water" }).click();
+  await expect(page.getByText("Splash Canyon")).toBeVisible();
+  await expect(page.getByText("Grand Carousel")).toHaveCount(0);
 
   // ...and switching to About Us shows the real park info (story, hours, contact).
   await page.getByText("About Us").click();
