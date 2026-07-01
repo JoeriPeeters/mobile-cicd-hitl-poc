@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.DS_Store
+coverage/
+
+# Mobile build artifacts (once real builds are wired in)
+ios/build/
+android/app/build/
+*.ipa
+*.aab
+*.apk

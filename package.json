@@ -1,0 +1,12 @@
+{
+  "name": "mobile-cicd-hitl-poc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React Native app skeleton for a HITL CI/CD feasibility POC.",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

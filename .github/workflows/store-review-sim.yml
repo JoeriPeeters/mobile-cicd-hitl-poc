@@ -1,0 +1,59 @@
+# Store review — SIMULATED.
+#
+# Models the EXTERNAL, asynchronous Apple/Google review verdict. In production
+# this arrives via store webhooks / API polling, potentially days after submit.
+# Here you fire it manually so the POC can exercise the full "submit → wait →
+# react" lifecycle, including the human rejection loop.
+name: Store review (simulated)
+
+on:
+  workflow_dispatch:
+    inputs:
+      submission_id:
+        description: "Mock submission id from the Release run"
+        required: true
+      verdict:
+        description: "Simulated store decision"
+        type: choice
+        options: [approved, rejected]
+        required: true
+      reason:
+        description: "Rejection reason (only if rejected)"
+        required: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Handle verdict
+        run: |
+          if [ "${{ inputs.verdict }}" = "approved" ]; then
+            echo "✅ [SIMULATED] Store APPROVED ${{ inputs.submission_id }}"
+            echo "→ Release (mock). Real next step: begin a phased / staged rollout,"
+            echo "  then monitor crash-free rate and advance or halt — the rollout"
+            echo "  percentage is your blast-radius dial."
+          else
+            echo "❌ [SIMULATED] Store REJECTED ${{ inputs.submission_id }}"
+            echo "Reason: ${{ inputs.reason || 'unspecified' }}"
+            echo "→ Routing to the human rejection loop (opening an issue)."
+          fi
+
+      - name: Open rejection issue (human loop)
+        if: ${{ inputs.verdict == 'rejected' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create store-rejection --color b60205 --force \
+            --description "A simulated store review rejected a submission" \
+            --repo "${{ github.repository }}" >/dev/null 2>&1 || true
+          gh issue create --repo "${{ github.repository }}" \
+            --title "Store rejection: ${{ inputs.submission_id }}" \
+            --label store-rejection \
+            --body "The simulated store review **rejected** submission \`${{ inputs.submission_id }}\`.
+
+**Reason:** ${{ inputs.reason || 'unspecified' }}
+
+Human loop: fix the issue, cut a new **Release**, and resubmit."

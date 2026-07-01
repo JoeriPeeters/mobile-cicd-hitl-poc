@@ -1,0 +1,84 @@
+# Release pipeline (feasibility POC).
+#
+#   build (test + MOCK build)
+#     └─▶ 🧑 approval gate (production environment, required reviewer)
+#           └─▶ submit (MOCK store submit → "pending review")
+#
+# The native build and the store submission are MOCKED — each is a clean seam
+# with a comment showing the real fastlane / EAS command that replaces it. The
+# human approval gate and the async "submit → wait → react" lifecycle are REAL,
+# because those are what this POC is testing.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to release"
+        type: choice
+        options: [both, ios, android]
+        default: both
+      version:
+        description: "Version / build name (e.g. 1.2.0)"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      submission_id: ${{ steps.ids.outputs.submission_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Test
+        run: npm test
+
+      # ── MOCK BUILD ─────────────────────────────────────────────────────────
+      # Real build goes here. Swap this step for:
+      #   iOS:      fastlane gym            (or `eas build --platform ios`)
+      #   Android:  ./gradlew bundleRelease (or `eas build --platform android`)
+      # Needs signing credentials (fastlane match / EAS credentials) and, for
+      # iOS, a macOS runner (`runs-on: macos-latest`).
+      - name: Build (mock)
+        run: |
+          echo "🔧 [MOCK BUILD] platform=${{ inputs.platform }} version=${{ inputs.version }}"
+          echo "   No real native build — this is the tool-agnostic seam."
+
+      - name: Compute mock submission id
+        id: ids
+        run: |
+          sid="sub-${{ inputs.version }}-${{ github.run_id }}"
+          echo "submission_id=$sid" >> "$GITHUB_OUTPUT"
+          echo "Mock submission id: $sid"
+
+  submit:
+    needs: build
+    runs-on: ubuntu-latest
+    # ── HITL RELEASE-APPROVAL GATE ─────────────────────────────────────────
+    # This job pauses until a required reviewer approves the `production`
+    # environment. Nothing is submitted without an explicit human OK — the
+    # highest-blast-radius, least-reversible step gets the strongest gate.
+    environment: production
+    steps:
+      # ── MOCK STORE SUBMIT ──────────────────────────────────────────────────
+      # Real submit goes here. Swap this step for:
+      #   iOS:      fastlane deliver / pilot   (App Store Connect API)
+      #   Android:  fastlane supply            (Google Play Developer API)
+      #   or:       eas submit --platform ...
+      - name: Submit to stores (mock)
+        run: |
+          echo "📤 [MOCK SUBMIT] ${{ needs.build.outputs.submission_id }} → App Store + Play (${{ inputs.platform }})"
+          echo "Status: PENDING store review."
+
+      - name: What happens next
+        run: |
+          echo "Store review is EXTERNAL and ASYNC (hours–days). In production the"
+          echo "verdict arrives via store webhooks / API polling. For this POC,"
+          echo "simulate it: run the 'Store review (simulated)' workflow with"
+          echo "  submission_id = ${{ needs.build.outputs.submission_id }}"
