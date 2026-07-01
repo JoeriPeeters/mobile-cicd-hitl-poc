@@ -1,0 +1,53 @@
+# Auto-implement an issue with the Claude coding agent.
+#
+# Trigger: add the `claude` label to an issue. Claude implements it on a branch
+# and opens a PR — authored by the Claude bot, so a human (you) can legitimately
+# approve it at the review gate.
+name: Claude — implement issue
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  implement:
+    if: github.event.label.name == 'claude'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write # the action mints its GitHub token via OIDC
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          base_branch: main
+          claude_args: |
+            --model claude-opus-4-8
+            --max-turns 25
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,Bash"
+          prompt: |
+            Implement GitHub issue #${{ github.event.issue.number }} in this repository.
+
+            Title: ${{ github.event.issue.title }}
+
+            Follow .github/copilot-instructions.md. This is a HITL CI/CD
+            feasibility POC for a React Native (Expo) app: the native build and
+            the app-store submission are deliberately MOCKED — do not turn them
+            into real builds or submissions.
+
+            Requirements:
+            - Make the smallest change that satisfies the issue.
+            - Add or update tests; run `npm install` then `npm test` and make sure
+              it passes before opening the PR.
+            - If you change the app UI (mobile/App.js), the visual-test job will
+              screenshot it on the PR — keep the change coherent.
+            - Open a pull request targeting `main` that links back to this issue
+              (e.g. "Closes #${{ github.event.issue.number }}"), describing what
+              changed, how you verified it, and any assumptions.
+            - Do not modify files under .github/ or the release gates.
