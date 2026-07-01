@@ -25,6 +25,13 @@ export default function App() {
             Reviewers see the actual rendered UI before approving the merge.
           </Text>
         </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Release gates</Text>
+          <Text style={styles.cardBody}>
+            Every release passes a human approval gate before the (mocked) store
+            submit.
+          </Text>
+        </View>
       </View>
 
       <View style={styles.cta}>
