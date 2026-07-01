@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "HITL CI/CD POC",
+    "slug": "mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

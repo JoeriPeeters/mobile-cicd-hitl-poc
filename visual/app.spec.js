@@ -8,8 +8,9 @@ const OUT = "screenshots";
 // a screenshot per device viewport as visual evidence for the PR.
 test("home screen renders", async ({ page }, testInfo) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "HITL CI/CD POC" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Get started" })).toBeVisible();
+  // react-native-web renders <Text> as spans/divs, not HTML headings, so match by text.
+  await expect(page.getByText("HITL CI/CD POC")).toBeVisible();
+  await expect(page.getByText("Get started")).toBeVisible();
 
   fs.mkdirSync(OUT, { recursive: true });
   const file = path.join(OUT, `home-${testInfo.project.name}.png`);

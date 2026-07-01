@@ -7,7 +7,8 @@ module.exports = defineConfig({
   testDir: "./visual",
   outputDir: "./playwright-out",
   webServer: {
-    command: "python3 -m http.server 4173 --directory web",
+    // Serves the real Expo web export (built in CI: `expo export --platform web`).
+    command: "python3 -m http.server 4173 --directory mobile/dist",
     url: "http://localhost:4173",
     reuseExistingServer: false,
   },

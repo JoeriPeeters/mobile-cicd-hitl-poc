@@ -34,6 +34,14 @@ jobs:
         # iPhone device profile uses WebKit; Pixel uses Chromium.
         run: npx playwright install --with-deps chromium webkit
 
+      - name: Build the Expo web export (the real render)
+        working-directory: mobile
+        run: |
+          npm install
+          npx expo install --fix || true   # align deps to the Expo SDK
+          npx expo export --platform web --output-dir dist
+          echo "Exported to mobile/dist:"; ls dist
+
       - name: Capture screenshots
         run: npm run test:visual
 
