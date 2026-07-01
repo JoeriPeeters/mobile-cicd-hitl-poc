@@ -32,6 +32,30 @@ PR ─▶ CI (npm test)  ─▶ 🧑 code review + merge        ← real HITL ga
 
 See [`docs/release-gates.md`](docs/release-gates.md) for the full rationale.
 
+## Where to start
+
+Pick the door for what you're here to do:
+
+| I want to… | Start here |
+| --- | --- |
+| Understand the whole gated flow | [`docs/pipeline.md`](docs/pipeline.md) |
+| **Build a UI feature** | [`docs/design-workflow.md`](docs/design-workflow.md) — design → spec → agent → PR |
+| Write/read a feature's spec | [`specs/`](specs/) (start from [`specs/TEMPLATE.md`](specs/TEMPLATE.md)) |
+| Run a release end to end | [Try the flow](#try-the-flow) below |
+| Act as the coding agent | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) |
+
+**Build a feature (the common path).** UI work is design-driven: design a frame in
+the [Thunderloop Park — App Design](https://www.figma.com/design/dS7tk29b3L60YYGpobJn3t/Thunderloop-Park--App-Design)
+Figma file, capture it as `specs/<feature>.md` (link the frame in `figma:`), open a
+PR with just the spec, then file a `claude`-labelled issue "Implement
+`specs/<feature>.md`". The agent builds it in `mobile/App.js`; you review the PR —
+comparing the visual-test screenshot to the Figma frame — and merge. Full loop:
+[`docs/design-workflow.md`](docs/design-workflow.md). Worked examples:
+[`specs/home-screen.md`](specs/home-screen.md) and its siblings.
+
+**Day one, hands on.** `npm install` → `npm test`, then open a trivial PR to watch
+CI and the visual screenshot run.
+
 ## Try the flow
 
 1. **CI** — open a PR; `CI / test` runs and must pass. Branch protection requires
@@ -57,6 +81,7 @@ See [`docs/release-gates.md`](docs/release-gates.md) for the full rationale.
 - Swap a mock for a real build/submit (fastlane or EAS) behind the same gate.
 - Add **risk-based routing** and agent-assisted review (ported from the
   `agentic-hitl-poc` reference).
-- Add the **Figma / design** flow: specs point to an approved Figma frame, an
-  agent implements via the Figma MCP + Code Connect, and a visual-verify step
-  checks fidelity.
+- Extend the **design flow** (already seeded — see
+  [`docs/design-workflow.md`](docs/design-workflow.md)): add Figma **Code Connect**
+  mappings and an automated visual-verify step that diffs the PR screenshot against
+  the linked Figma frame.
