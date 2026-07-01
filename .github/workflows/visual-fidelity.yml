@@ -1,0 +1,50 @@
+# Design fidelity review — ADVISORY (specs/visual-fidelity-agent.md).
+#
+# After the Visual test workflow renders the app and uploads screenshots, this
+# job renders the spec's linked Figma frame and asks a vision model to compare
+# the two, then posts a single "🎨 Design fidelity review" comment on the PR.
+#
+# It is advisory only: it runs on `workflow_run` (not as a PR check), so it is
+# never a required status and can never block or fail the PR. The human at
+# GATE 1 still decides. Read-only blast radius: it may read the repo + PR and
+# post/update one comment — it never pushes commits or edits files.
+#
+# Decoupled from visual.yml on purpose (the spec's default): visual rendering
+# and this review stay separate, and visual.yml is left unchanged.
+name: Design fidelity review
+
+on:
+  workflow_run:
+    workflows: ["Visual test"]
+    types: [completed]
+
+# Least privilege: read the repo, comment on the PR. Nothing more.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    # Only when the PR that triggered the visual run actually exists.
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Design fidelity review (advisory)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Secrets are exposed only to this step; they're never echoed.
+          FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: node .github/scripts/visual-fidelity-review.js
