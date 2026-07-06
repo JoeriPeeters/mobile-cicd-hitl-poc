@@ -76,12 +76,13 @@ function HomeScreen() {
 }
 
 // One ride: a solid category-colored thumbnail + name + category chip + a stat
-// line ending in a 5-dot thrill meter (● filled / ○ empty).
-function AttractionCard({ attraction }) {
+// line ending in a 5-dot thrill meter (● filled / ○ empty). Tapping the card
+// opens its detail screen via `onPress`.
+function AttractionCard({ attraction, onPress }) {
   const color = CATEGORY_COLOR[attraction.category];
   const meter = "●".repeat(attraction.thrill) + "○".repeat(5 - attraction.thrill);
   return (
-    <View style={styles.attractionCard}>
+    <Pressable style={styles.attractionCard} onPress={onPress} accessibilityRole="button">
       <View style={[styles.thumb, { backgroundColor: color }]}>
         <Text style={styles.thumbEmoji}>{attraction.emoji}</Text>
       </View>
@@ -94,12 +95,59 @@ function AttractionCard({ attraction }) {
           {attraction.stat} · Thrill {meter}
         </Text>
       </View>
-    </View>
+    </Pressable>
+  );
+}
+
+// Detail view for a single ride, opened from a tapped card. Data-driven from the
+// existing ride fields: a back link, a category-tinted hero, a category chip, and
+// a stats card with the ride's stat line and a Thrill level 5-dot meter.
+function AttractionDetail({ attraction, onBack }) {
+  const color = CATEGORY_COLOR[attraction.category];
+  const filled = "●".repeat(attraction.thrill);
+  const empty = "○".repeat(5 - attraction.thrill);
+  return (
+    <ScrollView contentContainerStyle={styles.screenBody}>
+      <Pressable onPress={onBack} accessibilityRole="button">
+        <Text style={styles.backLink}>‹ Attractions</Text>
+      </Pressable>
+
+      <View style={[styles.hero, { backgroundColor: color }]}>
+        <Text style={styles.heroEmoji}>{attraction.emoji}</Text>
+        <Text style={styles.heroTitle}>{attraction.name}</Text>
+        <Text style={styles.heroSub}>{attraction.category} ride</Text>
+      </View>
+
+      <View style={[styles.categoryChip, { backgroundColor: color }]}>
+        <Text style={styles.categoryChipText}>{attraction.category}</Text>
+      </View>
+
+      <View style={styles.card}>
+        <View style={styles.cardText}>
+          <Text style={styles.detailStat}>{attraction.stat}</Text>
+          <View style={styles.thrillRow}>
+            <Text style={styles.thrillLabel}>Thrill level</Text>
+            <Text style={styles.thrillMeter}>
+              <Text style={styles.thrillFilled}>{filled}</Text>
+              <Text style={styles.thrillEmpty}>{empty}</Text>
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 function AttractionsScreen() {
   const [filter, setFilter] = useState("All");
+  const [selected, setSelected] = useState(null);
+
+  // A tapped card selects a ride; the detail screen replaces the list until the
+  // back link clears the selection (a child of the Attractions tab, no new tab).
+  if (selected) {
+    return <AttractionDetail attraction={selected} onBack={() => setSelected(null)} />;
+  }
+
   const rides =
     filter === "All" ? ATTRACTIONS : ATTRACTIONS.filter((a) => a.category === filter);
 
@@ -126,7 +174,7 @@ function AttractionsScreen() {
       </View>
 
       {rides.map((a) => (
-        <AttractionCard key={a.name} attraction={a} />
+        <AttractionCard key={a.name} attraction={a} onPress={() => setSelected(a)} />
       ))}
     </ScrollView>
   );
@@ -301,6 +349,14 @@ const styles = StyleSheet.create({
   categoryChip: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   categoryChipText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   attractionStat: { color: "#d6c7f0", fontSize: 13 },
+
+  backLink: { color: "#ffd93d", fontSize: 15, fontWeight: "800", marginBottom: 4 },
+  detailStat: { color: "#fff", fontSize: 22, fontWeight: "800" },
+  thrillRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 },
+  thrillLabel: { color: "#d6c7f0", fontSize: 14, fontWeight: "600" },
+  thrillMeter: { fontSize: 16 },
+  thrillFilled: { color: "#ffd93d" },
+  thrillEmpty: { color: "#9a8bb8" },
 
   tabBar: {
     flexDirection: "row",
