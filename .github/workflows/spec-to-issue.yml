@@ -1,0 +1,70 @@
+# When a NEW spec lands on main, open a matching "Implement specs/<feature>.md"
+# issue — deliberately UNLABELED.
+#
+# The automation only removes the drudgery of hand-writing the issue. It does
+# NOT hand anything to the coding agent: `claude-implement.yml` triggers on the
+# `claude` label, and this workflow never applies it. A human still reads the
+# auto-opened issue and adds the `claude` label themselves — the "go" gate at
+# the entry to implementation stays fully human (mirroring the PR-merge gate at
+# the exit).
+name: Spec → implementation issue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "specs/**.md"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  open-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # need the previous commit to diff the push
+
+      - name: Open an (unlabeled) issue for each newly added spec
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          # Diff base: fall back to HEAD~1 on the first push / a zero SHA.
+          if [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE="HEAD~1"
+          fi
+
+          # Specs ADDED in this push (status A), excluding the scaffolding files.
+          added=$(git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- specs/ \
+            | grep -E '\.md$' \
+            | grep -vE 'specs/(TEMPLATE|README)\.md' || true)
+
+          if [ -z "$added" ]; then
+            echo "No newly added specs in this push — nothing to open."
+            exit 0
+          fi
+
+          while IFS= read -r spec; do
+            [ -z "$spec" ] && continue
+            title="Implement $spec"
+
+            # Idempotent: skip if an open issue with this exact title already exists.
+            if gh issue list --repo "$REPO" --state open --search "in:title \"$title\"" \
+                 --json title --jq '.[].title' | grep -Fxq "$title"; then
+              echo "Issue already open: $title — skipping."
+              continue
+            fi
+
+            # Single-quoted format string keeps backticks literal; %s are filled by args.
+            body=$(printf 'Auto-opened because `%s` was merged to `main`.\n\n**This issue is intentionally unlabeled.** Read the spec first — it is the source of truth for behavior and acceptance criteria (and links the Figma frame). When it is ready to build, add the **`claude`** label to hand it to the coding agent. Nothing runs until you do.\n\n- Spec: [`%s`](../blob/main/%s)\n- Done when: all acceptance criteria in the spec pass and `npm test` is green.\n' "$spec" "$spec" "$spec")
+
+            gh issue create --repo "$REPO" --title "$title" --body "$body"
+            echo "Opened issue: $title"
+          done <<< "$added"
