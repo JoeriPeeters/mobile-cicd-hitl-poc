@@ -74,6 +74,10 @@ describe("screenKeyForSpec", () => {
     expect(screenKeyForSpec("specs/home-screen.md")).toBe("home");
     expect(screenKeyForSpec("specs/attractions-screen.md")).toBe("attractions");
   });
+
+  it("strips a `-list` variant descriptor to the tab's screenshot prefix", () => {
+    expect(screenKeyForSpec("specs/attractions-list.md")).toBe("attractions");
+  });
 });
 
 describe("comment builders", () => {

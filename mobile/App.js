@@ -11,6 +11,29 @@ const COASTERS = [
   { emoji: "💦", name: "Splash Canyon", blurb: "The wettest drop in the park." },
 ];
 
+// Every ride's category maps to a themed color, reused for its thumbnail block
+// and its category chip. (The Figma uses per-ride gradients; the baseline uses a
+// solid category color — an accepted simplification, see specs/attractions-list.md.)
+const CATEGORY_COLOR = {
+  Thrill: "#f637ec",
+  Water: "#37b6f6",
+  Family: "#34d399",
+  Dark: "#7b2ff7",
+};
+
+// The park's rides shown on the Attractions tab. `thrill` (0–5) drives the dot meter.
+const ATTRACTIONS = [
+  { emoji: "🎢", name: "The Screaming Comet", category: "Thrill", stat: "⚡ 120 km/h", thrill: 5 },
+  { emoji: "🌀", name: "Cyclone Twister", category: "Thrill", stat: "🔁 7 loops", thrill: 5 },
+  { emoji: "💦", name: "Splash Canyon", category: "Water", stat: "💧 22 m drop", thrill: 3 },
+  { emoji: "🎠", name: "Grand Carousel", category: "Family", stat: "🎵 all ages", thrill: 1 },
+  { emoji: "🎡", name: "Skyline Wheel", category: "Family", stat: "🌇 85 m views", thrill: 2 },
+  { emoji: "👻", name: "Haunted Mine", category: "Dark", stat: "🕯️ indoor", thrill: 3 },
+];
+
+// Filter chips above the list. "All" clears the filter and shows every ride.
+const ATTRACTION_FILTERS = ["All", "Thrill", "Water", "Family"];
+
 // Primary navigation tabs. Home is active by default.
 const TABS = [
   { key: "home", label: "Home", icon: "🎡" },
@@ -52,15 +75,60 @@ function HomeScreen() {
   );
 }
 
-function AttractionsScreen() {
+// One ride: a solid category-colored thumbnail + name + category chip + a stat
+// line ending in a 5-dot thrill meter (● filled / ○ empty).
+function AttractionCard({ attraction }) {
+  const color = CATEGORY_COLOR[attraction.category];
+  const meter = "●".repeat(attraction.thrill) + "○".repeat(5 - attraction.thrill);
   return (
-    <View style={styles.placeholder}>
-      <Text style={styles.placeholderEmoji}>🎠</Text>
-      <Text style={styles.placeholderTitle}>Attractions</Text>
-      <Text style={styles.placeholderBody}>
-        Every ride, show, and snack stand — coming soon to this tab.
-      </Text>
+    <View style={styles.attractionCard}>
+      <View style={[styles.thumb, { backgroundColor: color }]}>
+        <Text style={styles.thumbEmoji}>{attraction.emoji}</Text>
+      </View>
+      <View style={styles.attractionText}>
+        <Text style={styles.attractionName}>{attraction.name}</Text>
+        <View style={[styles.categoryChip, { backgroundColor: color }]}>
+          <Text style={styles.categoryChipText}>{attraction.category}</Text>
+        </View>
+        <Text style={styles.attractionStat}>
+          {attraction.stat} · Thrill {meter}
+        </Text>
+      </View>
     </View>
+  );
+}
+
+function AttractionsScreen() {
+  const [filter, setFilter] = useState("All");
+  const rides =
+    filter === "All" ? ATTRACTIONS : ATTRACTIONS.filter((a) => a.category === filter);
+
+  return (
+    <ScrollView contentContainerStyle={styles.screenBody}>
+      <Text style={styles.attractionsTitle}>Attractions</Text>
+      <Text style={styles.attractionsSub}>{ATTRACTIONS.length} rides & attractions</Text>
+
+      <View style={styles.chipRow}>
+        {ATTRACTION_FILTERS.map((c) => {
+          const active = c === filter;
+          return (
+            <Pressable
+              key={c}
+              style={[styles.filterChip, active && styles.filterChipActive]}
+              onPress={() => setFilter(c)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+            >
+              <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{c}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {rides.map((a) => (
+        <AttractionCard key={a.name} attraction={a} />
+      ))}
+    </ScrollView>
   );
 }
 
@@ -209,10 +277,30 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: "#1a0b2e", fontSize: 17, fontWeight: "800" },
 
-  placeholder: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  placeholderEmoji: { fontSize: 64 },
-  placeholderTitle: { color: "#ffd93d", fontSize: 26, fontWeight: "900", marginTop: 12 },
-  placeholderBody: { color: "#d6c7f0", fontSize: 15, textAlign: "center", marginTop: 8 },
+  attractionsTitle: { color: "#ffd93d", fontSize: 26, fontWeight: "900" },
+  attractionsSub: { color: "#d6c7f0", fontSize: 14, marginTop: 2, marginBottom: 4 },
+
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 4 },
+  filterChip: { backgroundColor: "#2d1b4e", borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  filterChipActive: { backgroundColor: "#ffd93d" },
+  filterChipText: { color: "#9a8bb8", fontSize: 13, fontWeight: "700" },
+  filterChipTextActive: { color: "#1a0b2e" },
+
+  attractionCard: {
+    backgroundColor: "#2d1b4e",
+    borderRadius: 14,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  thumb: { width: 72, height: 72, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  thumbEmoji: { fontSize: 38 },
+  attractionText: { flex: 1, gap: 4 },
+  attractionName: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  categoryChip: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  categoryChipText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  attractionStat: { color: "#d6c7f0", fontSize: 13 },
 
   tabBar: {
     flexDirection: "row",

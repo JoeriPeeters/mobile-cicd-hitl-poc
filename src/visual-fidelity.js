@@ -59,11 +59,15 @@ function figmaImageApiUrl({ fileKey, nodeId }) {
     `?ids=${encodeURIComponent(nodeId)}&format=png&scale=2`;
 }
 
-/** Pick the screenshot that matches a spec, e.g. `home-screen.md` → `home`. */
+/**
+ * Pick the screenshot that matches a spec, e.g. `home-screen.md` → `home`.
+ * A trailing screen descriptor (`-screen`, `-list`) is stripped so variant specs
+ * for the same tab (e.g. `attractions-list.md`) map to the same `attractions-*.png`.
+ */
 function screenKeyForSpec(specPath) {
   if (typeof specPath !== "string") return null;
   const base = specPath.split("/").pop().replace(/\.md$/, "");
-  return base.replace(/-screen$/, "");
+  return base.replace(/-(screen|list)$/, "");
 }
 
 /** Wrap a graceful skip note as the advisory comment (fail-open path). */
