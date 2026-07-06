@@ -39,8 +39,10 @@ test("home screen renders and tabs switch", async ({ page }, testInfo) => {
   await expect(page.getByText("6 rides & attractions")).toBeVisible();
   await expect(page.getByText("Grand Carousel")).toBeVisible();
 
-  // Filter chips narrow the list to one category via local state.
-  await page.getByRole("button", { name: "Water" }).click();
+  // Filter chips narrow the list to one category via local state. Cards are now
+  // buttons too, so match the chip's exact accessible name ("Water") to avoid
+  // resolving the "💦 Splash Canyon Water …" card under Playwright strict mode.
+  await page.getByRole("button", { name: "Water", exact: true }).click();
   await expect(page.getByText("Splash Canyon")).toBeVisible();
   await expect(page.getByText("Grand Carousel")).toHaveCount(0);
 
