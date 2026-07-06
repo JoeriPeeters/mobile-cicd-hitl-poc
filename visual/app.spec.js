@@ -26,8 +26,23 @@ test("home screen renders and tabs switch", async ({ page }, testInfo) => {
   await expect(page.getByText("Haunted Mine")).toBeVisible();
   await page.screenshot({ path: path.join(OUT, `attractions-${testInfo.project.name}.png`), fullPage: true });
 
-  // Filter chips narrow the list to one category via local state.
-  await page.getByRole("button", { name: "Water" }).click();
+  // Tapping a card opens that ride's detail screen (a child of the Attractions
+  // tab): category-tinted hero, chip, and a Thrill level meter — the list is gone.
+  await page.getByText("The Screaming Comet").click();
+  await expect(page.getByText("Thrill ride")).toBeVisible();
+  await expect(page.getByText("Thrill level")).toBeVisible();
+  await expect(page.getByText("6 rides & attractions")).toHaveCount(0);
+  await page.screenshot({ path: path.join(OUT, `attraction-detail-${testInfo.project.name}.png`), fullPage: true });
+
+  // The back link returns to the browsable list.
+  await page.getByText("‹ Attractions").click();
+  await expect(page.getByText("6 rides & attractions")).toBeVisible();
+  await expect(page.getByText("Grand Carousel")).toBeVisible();
+
+  // Filter chips narrow the list to one category via local state. Cards are now
+  // buttons too, so match the chip's exact accessible name ("Water") to avoid
+  // resolving the "💦 Splash Canyon Water …" card under Playwright strict mode.
+  await page.getByRole("button", { name: "Water", exact: true }).click();
   await expect(page.getByText("Splash Canyon")).toBeVisible();
   await expect(page.getByText("Grand Carousel")).toHaveCount(0);
 
