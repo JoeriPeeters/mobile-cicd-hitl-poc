@@ -41,6 +41,7 @@ Pick the door for what you're here to do:
 | Understand the whole gated flow | [`docs/pipeline.md`](docs/pipeline.md) |
 | **Build a UI feature** | [`docs/design-workflow.md`](docs/design-workflow.md) — design → spec → agent → PR |
 | Write/read a feature's spec | [`specs/`](specs/) (start from [`specs/TEMPLATE.md`](specs/TEMPLATE.md)) |
+| **Run the app to demo it** | [Run the app locally](#run-the-app-locally) below |
 | Run a release end to end | [Try the flow](#try-the-flow) below |
 | Act as the coding agent | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) |
 
@@ -55,6 +56,34 @@ comparing the visual-test screenshot to the Figma frame — and merge. Full loop
 
 **Day one, hands on.** `npm install` → `npm test`, then open a trivial PR to watch
 CI and the visual screenshot run.
+
+## Run the app locally
+
+The Expo app lives in [`mobile/`](mobile/). You need **Node 18+** (CI uses 20; if
+you use `nvm`, run `nvm use 20`). Install once: `cd mobile && npm install`.
+
+**Web export — matches the pipeline (recommended for a demo).** This is the exact
+`expo export --platform web` artifact the visual test screenshots, so what you see
+is what CI verifies:
+
+```bash
+nvm use 20                 # or any Node 18+
+cd mobile
+npm install                # first time only
+npm run export:web         # builds mobile/dist/
+python3 -m http.server 4173 --directory dist   # then open http://localhost:4173
+```
+
+**Expo dev server — real device / simulator, with hot reload:**
+
+```bash
+cd mobile
+npx expo start             # press w = web, i = iOS sim, a = Android, or scan the QR in Expo Go
+```
+
+Either way you get the three tabs — **Home**, **Attractions** (the filterable
+rides list), and **About Us**. Web and Expo Go need no extra tooling; the iOS
+simulator needs Xcode and Android needs a running emulator.
 
 ## Try the flow
 
