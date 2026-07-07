@@ -26,6 +26,12 @@ test("home screen renders and tabs switch", async ({ page }, testInfo) => {
   await expect(page.getByText("Haunted Mine")).toBeVisible();
   await page.screenshot({ path: path.join(OUT, `attractions-${testInfo.project.name}.png`), fullPage: true });
 
+  // Each ride card carries an operational status badge (specs/ride-status.md).
+  // Assert an "Open" badge is visible and capture the screen as ride-status-*.png
+  // so the design-fidelity agent maps ride-status.md → this shot vs the Figma frame.
+  await expect(page.getByText("● Open").first()).toBeVisible();
+  await page.screenshot({ path: path.join(OUT, `ride-status-${testInfo.project.name}.png`), fullPage: true });
+
   // Tapping a card opens that ride's detail screen (a child of the Attractions
   // tab): category-tinted hero, chip, and a Thrill level meter — the list is gone.
   await page.getByText("The Screaming Comet").click();
