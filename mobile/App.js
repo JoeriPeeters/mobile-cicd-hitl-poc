@@ -21,14 +21,23 @@ const CATEGORY_COLOR = {
   Dark: "#7b2ff7",
 };
 
-// The park's rides shown on the Attractions tab. `thrill` (0–5) drives the dot meter.
+// Operational status → pill color (spec: specs/ride-status.md). Open = running,
+// Busy = long queue, Closed = not operating today. Shared lookup, no per-card literals.
+const STATUS_COLOR = {
+  Open: "#34d399",
+  Busy: "#f59e0b",
+  Closed: "#ef4444",
+};
+
+// The park's rides shown on the Attractions tab. `thrill` (0–5) drives the dot
+// meter; `status` ("Open" | "Busy" | "Closed") drives the status badge.
 const ATTRACTIONS = [
-  { emoji: "🎢", name: "The Screaming Comet", category: "Thrill", stat: "⚡ 120 km/h", thrill: 5 },
-  { emoji: "🌀", name: "Cyclone Twister", category: "Thrill", stat: "🔁 7 loops", thrill: 5 },
-  { emoji: "💦", name: "Splash Canyon", category: "Water", stat: "💧 22 m drop", thrill: 3 },
-  { emoji: "🎠", name: "Grand Carousel", category: "Family", stat: "🎵 all ages", thrill: 1 },
-  { emoji: "🎡", name: "Skyline Wheel", category: "Family", stat: "🌇 85 m views", thrill: 2 },
-  { emoji: "👻", name: "Haunted Mine", category: "Dark", stat: "🕯️ indoor", thrill: 3 },
+  { emoji: "🎢", name: "The Screaming Comet", category: "Thrill", stat: "⚡ 120 km/h", thrill: 5, status: "Open" },
+  { emoji: "🌀", name: "Cyclone Twister", category: "Thrill", stat: "🔁 7 loops", thrill: 5, status: "Busy" },
+  { emoji: "💦", name: "Splash Canyon", category: "Water", stat: "💧 22 m drop", thrill: 3, status: "Open" },
+  { emoji: "🎠", name: "Grand Carousel", category: "Family", stat: "🎵 all ages", thrill: 1, status: "Open" },
+  { emoji: "🎡", name: "Skyline Wheel", category: "Family", stat: "🌇 85 m views", thrill: 2, status: "Closed" },
+  { emoji: "👻", name: "Haunted Mine", category: "Dark", stat: "🕯️ indoor", thrill: 3, status: "Busy" },
 ];
 
 // Filter chips above the list. "All" clears the filter and shows every ride.
@@ -75,9 +84,19 @@ function HomeScreen() {
   );
 }
 
-// One ride: a solid category-colored thumbnail + name + category chip + a stat
-// line ending in a 5-dot thrill meter (● filled / ○ empty). Tapping the card
-// opens its detail screen via `onPress`.
+// A small solid pill — leading ● dot + the status word — colored by the ride's
+// operational status, matching the category-chip treatment. Sits beside the chip.
+function StatusBadge({ status }) {
+  return (
+    <View style={[styles.statusBadge, { backgroundColor: STATUS_COLOR[status] }]}>
+      <Text style={styles.statusBadgeText}>● {status}</Text>
+    </View>
+  );
+}
+
+// One ride: a solid category-colored thumbnail + name + category chip + status
+// badge + a stat line ending in a 5-dot thrill meter (● filled / ○ empty).
+// Tapping the card opens its detail screen via `onPress`.
 function AttractionCard({ attraction, onPress }) {
   const color = CATEGORY_COLOR[attraction.category];
   const meter = "●".repeat(attraction.thrill) + "○".repeat(5 - attraction.thrill);
@@ -88,8 +107,11 @@ function AttractionCard({ attraction, onPress }) {
       </View>
       <View style={styles.attractionText}>
         <Text style={styles.attractionName}>{attraction.name}</Text>
-        <View style={[styles.categoryChip, { backgroundColor: color }]}>
-          <Text style={styles.categoryChipText}>{attraction.category}</Text>
+        <View style={styles.chipRow}>
+          <View style={[styles.categoryChip, { backgroundColor: color }]}>
+            <Text style={styles.categoryChipText}>{attraction.category}</Text>
+          </View>
+          <StatusBadge status={attraction.status} />
         </View>
         <Text style={styles.attractionStat}>
           {attraction.stat} · Thrill {meter}
@@ -118,8 +140,11 @@ function AttractionDetail({ attraction, onBack }) {
         <Text style={styles.heroSub}>{attraction.category} ride</Text>
       </View>
 
-      <View style={[styles.categoryChip, { backgroundColor: color }]}>
-        <Text style={styles.categoryChipText}>{attraction.category}</Text>
+      <View style={styles.chipRow}>
+        <View style={[styles.categoryChip, { backgroundColor: color }]}>
+          <Text style={styles.categoryChipText}>{attraction.category}</Text>
+        </View>
+        <StatusBadge status={attraction.status} />
       </View>
 
       <View style={styles.card}>
@@ -348,6 +373,8 @@ const styles = StyleSheet.create({
   attractionName: { color: "#fff", fontSize: 16, fontWeight: "700" },
   categoryChip: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   categoryChipText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  statusBadge: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  statusBadgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   attractionStat: { color: "#d6c7f0", fontSize: 13 },
 
   backLink: { color: "#ffd93d", fontSize: 15, fontWeight: "800", marginBottom: 4 },
